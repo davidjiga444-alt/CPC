@@ -1,0 +1,92 @@
+<%- include('./partials/head', { pageTitle: 'Dashboard' }) %>
+<body>
+<%- include('./partials/sidebar', { path: '/admin/dashboard', user: user }) %>
+
+<div class="main-content">
+  <div class="topbar">
+    <span class="topbar-title">Dashboard</span>
+    <a href="/admin/posts/new" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Nueva entrada
+    </a>
+  </div>
+
+  <div class="page-body">
+    <% const errorMsg = messages && messages.error && messages.error.length ? messages.error[0] : null %>
+    <% const successMsg = messages && messages.success && messages.success.length ? messages.success[0] : null %>
+    <% if (errorMsg) { %><div class="alert alert-danger mb-4"><%= errorMsg %></div><% } %>
+    <% if (successMsg) { %><div class="alert alert-success mb-4"><%= successMsg %></div><% } %>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#ede9fe;color:#7c3aed;"><i class="bi bi-file-earmark-text"></i></div>
+          <div class="stat-value"><%= stats.posts %></div>
+          <div class="stat-label">Entradas publicadas</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dbeafe;color:#1d4ed8;"><i class="bi bi-file-earmark"></i></div>
+          <div class="stat-value"><%= stats.pages %></div>
+          <div class="stat-label">Páginas</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dcfce7;color:#15803d;"><i class="bi bi-people"></i></div>
+          <div class="stat-value"><%= stats.users %></div>
+          <div class="stat-label">Usuarios</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef9c3;color:#a16207;"><i class="bi bi-image"></i></div>
+          <div class="stat-value"><%= stats.media %></div>
+          <div class="stat-label">Archivos subidos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent posts -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Entradas recientes</span>
+        <a href="/admin/posts" class="btn btn-sm" style="font-size:0.8rem;color:#6366f1;">Ver todas</a>
+      </div>
+      <div class="card-body p-0">
+        <% if (recentPosts && recentPosts.length > 0) { %>
+        <table class="table table-hover mb-0">
+          <thead><tr>
+            <th style="padding-left:18px;">Título</th>
+            <th>Estado</th>
+            <th>Autor</th>
+            <th>Fecha</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+          <% recentPosts.forEach(post => { %>
+            <tr>
+              <td style="padding-left:18px;font-weight:500;"><%= post.title %></td>
+              <td><span class="badge badge-<%= post.status %>"><%= post.status === 'published' ? 'Publicado' : 'Borrador' %></span></td>
+              <td style="color:#6b7280;"><%= post.username || '—' %></td>
+              <td style="color:#6b7280;font-size:0.8rem;"><%= new Date(post.created_at).toLocaleDateString('es-ES') %></td>
+              <td><a href="/admin/posts/<%= post.id %>/edit" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+        <% } else { %>
+          <div style="padding:32px;text-align:center;color:#9ca3af;">
+            <i class="bi bi-file-earmark-text" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            No hay entradas todavía. <a href="/admin/posts/new">Crea la primera</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

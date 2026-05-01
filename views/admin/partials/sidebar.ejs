@@ -1,0 +1,53 @@
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <a href="/admin/dashboard">
+      <div class="brand-icon">M</div>
+      MyCMS
+    </a>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a href="/admin/dashboard" class="sidebar-link <%= path === '/admin/dashboard' ? 'active' : '' %>">
+      <i class="bi bi-grid-1x2"></i> Dashboard
+    </a>
+
+    <div class="nav-section-label">Contenido</div>
+    <a href="/admin/posts" class="sidebar-link <%= path.startsWith('/admin/posts') ? 'active' : '' %>">
+      <i class="bi bi-file-earmark-text"></i> Entradas
+    </a>
+    <a href="/admin/pages" class="sidebar-link <%= path.startsWith('/admin/pages') ? 'active' : '' %>">
+      <i class="bi bi-file-earmark"></i> Páginas
+    </a>
+    <a href="/admin/categories" class="sidebar-link <%= path === '/admin/categories' ? 'active' : '' %>">
+      <i class="bi bi-tag"></i> Categorías
+    </a>
+    <a href="/admin/media" class="sidebar-link <%= path === '/admin/media' ? 'active' : '' %>">
+      <i class="bi bi-image"></i> Medios
+    </a>
+
+    <div class="nav-section-label">Sistema</div>
+    <a href="/admin/users" class="sidebar-link <%= path.startsWith('/admin/users') ? 'active' : '' %>">
+      <i class="bi bi-people"></i> Usuarios
+    </a>
+    <a href="/admin/settings" class="sidebar-link <%= path === '/admin/settings' ? 'active' : '' %>">
+      <i class="bi bi-gear"></i> Ajustes
+    </a>
+    <a href="/" target="_blank" class="sidebar-link">
+      <i class="bi bi-box-arrow-up-right"></i> Ver sitio
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar"><%= user && user.username ? user.username[0].toUpperCase() : 'U' %></div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name"><%= user ? user.username : 'Admin' %></div>
+        <div class="sidebar-user-role"><%= user ? user.role : '' %></div>
+      </div>
+      <a href="/admin/logout" title="Cerrar sesión" style="color:rgba(255,255,255,0.4);font-size:1rem;">
+        <i class="bi bi-box-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</nav>
