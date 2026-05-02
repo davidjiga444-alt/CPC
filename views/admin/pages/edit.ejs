@@ -1,0 +1,95 @@
+<%- include('../partials/head', { pageTitle: page && page.id ? 'Editar página' : 'Nueva página' }) %>
+<body>
+<%- include('../partials/sidebar', { path: '/admin/pages', user: user }) %>
+
+<div class="main-content">
+  <div class="topbar">
+    <div class="d-flex align-items-center gap-2">
+      <a href="/admin/pages" style="color:#6b7280;text-decoration:none;font-size:0.9rem;"><i class="bi bi-arrow-left me-1"></i>Páginas</a>
+      <span style="color:#d1d5db;">/</span>
+      <span class="topbar-title"><%= page && page.id ? 'Editar' : 'Nueva página' %></span>
+    </div>
+    <div class="d-flex gap-2">
+      <% if (page && page.id && page.status === 'published') { %>
+        <a href="/page/<%= page.slug %>" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye me-1"></i>Ver</a>
+      <% } %>
+      <button type="submit" form="page-form" name="status" value="draft" class="btn btn-sm btn-outline-secondary">Guardar borrador</button>
+      <button type="submit" form="page-form" name="status" value="published" class="btn btn-primary btn-sm">Publicar</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <% const errorMsg = messages && messages.error && messages.error.length ? messages.error[0] : null %>
+    <% if (errorMsg) { %><div class="alert alert-danger mb-3"><%= errorMsg %></div><% } %>
+
+    <form method="POST" id="page-form"
+      action="<%= page && page.id ? '/admin/pages/'+page.id+'?_method=PUT' : '/admin/pages' %>">
+
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card mb-3">
+            <div class="card-body">
+              <input type="text" name="title" class="form-control"
+                style="font-size:1.2rem;font-weight:600;border:none;padding:0;border-radius:0;box-shadow:none;"
+                placeholder="Título de la página"
+                value="<%= page ? page.title : '' %>" required>
+              <hr style="margin:12px 0 8px;">
+              <div style="font-size:0.8rem;color:#9ca3af;">
+                Enlace: /page/<span id="slug-preview"><%= page ? page.slug : '' %></span>
+              </div>
+              <input type="hidden" name="slug" id="slug" value="<%= page ? page.slug : '' %>">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">Contenido</div>
+            <div class="card-body p-0">
+              <textarea id="editor" name="content" style="width:100%;min-height:420px;padding:16px;border:none;font-family:'DM Sans',sans-serif;font-size:0.95rem;resize:vertical;outline:none;"><%= page ? page.content : '' %></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card mb-3">
+            <div class="card-header">Imagen destacada</div>
+            <div class="card-body">
+              <input type="text" name="featured_image" class="form-control form-control-sm"
+                placeholder="/uploads/imagen.jpg"
+                value="<%= page && page.featured_image ? page.featured_image : '' %>">
+              <% if (page && page.featured_image) { %>
+                <img src="<%= page.featured_image %>" class="mt-2 img-fluid" style="border-radius:6px;">
+              <% } %>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">SEO / Meta</div>
+            <div class="card-body">
+              <label class="form-label">Meta descripción</label>
+              <textarea name="meta_description" class="form-control form-control-sm" rows="3"><%= page && page.meta_description ? page.meta_description : '' %></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const titleInput = document.querySelector('input[name="title"]');
+  const slugInput = document.getElementById('slug');
+  const slugPreview = document.getElementById('slug-preview');
+  const isNew = !<%= page && page.id ? 'false' : 'true' %>;
+  function slugify(t) {
+    return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-');
+  }
+  if (isNew) {
+    titleInput.addEventListener('input', () => {
+      const s = slugify(titleInput.value);
+      slugInput.value = s; slugPreview.textContent = s;
+    });
+  }
+</script>
+</body>
+</html>
