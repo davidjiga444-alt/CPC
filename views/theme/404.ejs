@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 · Página no encontrada · <%= siteTitle || 'MyCMS' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root { --accent: #6366f1; --text: #111827; --muted: #6b7280; --border: #e5e7eb; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text); margin: 0; background: #fff;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .site-name { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; padding: 5px 10px; border-radius: 6px; }
+    .nav-links a:hover { color: var(--text); background: #f9fafb; }
+
+    .error-body {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 60px 24px; text-align: center;
+    }
+    .error-inner { max-width: 480px; }
+    .error-code {
+      font-family: 'DM Serif Display', serif;
+      font-size: 7rem; line-height: 1; color: #e5e7eb;
+      letter-spacing: -0.04em; margin-bottom: 4px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .error-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+    .error-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.65; margin-bottom: 32px; }
+    .error-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn-home {
+      background: var(--accent); color: white; text-decoration: none;
+      padding: 10px 22px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+      transition: background 0.15s;
+    }
+    .btn-home:hover { background: #4f46e5; color: white; }
+    .btn-back {
+      background: #f3f4f6; color: var(--text); text-decoration: none;
+      padding: 10px 22px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+      transition: background 0.15s;
+    }
+    .btn-back:hover { background: #e5e7eb; }
+
+    /* Quick links */
+    .quick-links { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--border); }
+    .quick-links-title { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .quick-links-list { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .quick-link {
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px;
+      text-decoration: none; color: var(--text); font-size: 0.85rem; transition: all 0.15s;
+    }
+    .quick-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    .site-footer { border-top: 1px solid var(--border); padding: 18px 24px; text-align: center; color: var(--muted); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="site-name"><%= siteTitle || 'MyCMS' %></a>
+  <nav class="nav-links">
+    <a href="/">Inicio</a>
+    <% if (navPages && navPages.length > 0) { %>
+      <% navPages.forEach(p => { %><a href="/page/<%= p.slug %>"><%= p.title %></a><% }) %>
+    <% } %>
+  </nav>
+</header>
+
+<div class="error-body">
+  <div class="error-inner">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Página no encontrada</h1>
+    <p class="error-desc">
+      Lo sentimos, la página que buscas no existe, ha sido movida o su dirección ha cambiado.
+    </p>
+    <div class="error-actions">
+      <a href="/" class="btn-home"><i class="bi bi-house me-1"></i>Volver al inicio</a>
+      <a href="javascript:history.back()" class="btn-back"><i class="bi bi-arrow-left me-1"></i>Página anterior</a>
+    </div>
+
+    <% if (navPages && navPages.length > 0) { %>
+    <div class="quick-links">
+      <div class="quick-links-title">Páginas disponibles</div>
+      <div class="quick-links-list">
+        <% navPages.forEach(p => { %>
+          <a href="/page/<%= p.slug %>" class="quick-link"><%= p.title %></a>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <a href="/" style="color:var(--muted);text-decoration:none;"><%= siteTitle || 'MyCMS' %></a>
+</footer>
+
+</body>
+</html>
