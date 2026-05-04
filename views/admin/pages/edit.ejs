@@ -19,11 +19,11 @@
   </div>
 
   <div class="page-body">
-    <% const errorMsg = messages && messages.error && messages.error.length ? messages.error[0] : null %>
+    <% const errorMsg = flash && flash.error && flash.error.length ? flash.error[0] : null %>
     <% if (errorMsg) { %><div class="alert alert-danger mb-3"><%= errorMsg %></div><% } %>
 
     <form method="POST" id="page-form"
-      action="<%= page && page.id ? '/admin/pages/'+page.id+'?_method=PUT' : '/admin/pages' %>">
+      action="<%= page && page.id ? '/admin/pages/'+page.id : '/admin/pages' %>">
 
       <div class="row g-4">
         <div class="col-lg-8">
