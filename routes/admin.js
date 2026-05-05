@@ -107,7 +107,9 @@ router.get('/posts', requireAuth, (req, res) => {
   res.render('admin/posts/index', {
     user: req.session.user, posts, total,
     page, perPage, pages: Math.ceil(total / perPage),
-    status, search, siteTitle: getSetting('site_title'),
+    status,
+    filterStatus: status,
+    search, siteTitle: getSetting('site_title'),
     flash: { error: req.flash('error'), success: req.flash('success') }
   });
 });
