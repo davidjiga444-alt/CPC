@@ -9,8 +9,8 @@
   </div>
 
   <div class="page-body">
-    <% const errorMsg = messages && messages.error && messages.error.length ? messages.error[0] : null %>
-    <% const successMsg = messages && messages.success && messages.success.length ? messages.success[0] : null %>
+    <% const errorMsg = flash && flash.error && flash.error.length ? flash.error[0] : null %>
+    <% const successMsg = flash && flash.success && flash.success.length ? flash.success[0] : null %>
     <% if (errorMsg) { %><div class="alert alert-danger mb-4"><%= errorMsg %></div><% } %>
     <% if (successMsg) { %><div class="alert alert-success mb-4"><%= successMsg %></div><% } %>
 

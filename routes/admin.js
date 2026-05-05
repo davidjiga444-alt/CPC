@@ -66,6 +66,10 @@ router.get('/logout', (req, res) => {
   res.redirect('/admin/login');
 });
 
+router.get('/', (req, res) => {
+  res.redirect('/admin/dashboard');
+});
+
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
 
 router.get('/dashboard', requireAuth, (req, res) => {
@@ -348,10 +352,18 @@ router.post('/users/:id/delete', requireAuth, requireAdmin, (req, res) => {
 router.get('/settings', requireAuth, requireAdmin, (req, res) => {
   res.render('admin/settings', {
     user: req.session.user,
+    settings: {
+      site_title: getSetting('site_title'),
+      site_description: getSetting('site_description'),
+      site_url: getSetting('site_url'),
+      posts_per_page: getSetting('posts_per_page'),
+      theme: getSetting('theme'),
+      site_logo: getSetting('site_logo'),
+      site_favicon: getSetting('site_favicon'),
+      footer_text: getSetting('footer_text'),
+      installed_at: getSetting('installed_at')
+    },
     siteTitle: getSetting('site_title'),
-    siteDescription: getSetting('site_description'),
-    siteUrl: getSetting('site_url'),
-    postsPerPage: getSetting('posts_per_page'),
     flash: { error: req.flash('error'), success: req.flash('success') }
   });
 });

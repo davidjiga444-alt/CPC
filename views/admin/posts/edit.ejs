@@ -19,7 +19,7 @@
   </div>
 
   <div class="page-body">
-    <% const errorMsg = messages && messages.error && messages.error.length ? messages.error[0] : null %>
+    <% const errorMsg = flash && flash.error && flash.error.length ? flash.error[0] : null %>
     <% if (errorMsg) { %><div class="alert alert-danger mb-3"><%= errorMsg %></div><% } %>
 
     <form method="POST" id="post-form"
