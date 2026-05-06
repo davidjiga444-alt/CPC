@@ -28,7 +28,7 @@ error()   { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║        Instalando MyCMS (TFG)            ║"
+echo "║        Instalando MyCMS (TFC)            ║"
 echo "║        Ubuntu Server 24.04               ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
