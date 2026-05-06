@@ -5,7 +5,7 @@ const { initializeDatabase, isInstalled, setSetting, getDb } = require('../confi
 
 router.get('/', (req, res) => {
   if (isInstalled()) return res.redirect('/admin/dashboard');
-  res.render('setup/index', { error: null, step: 1 });
+  res.render('setup/index', { error: null, step: 1, body: {} });
 });
 
 router.post('/', async (req, res) => {

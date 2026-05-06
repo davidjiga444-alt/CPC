@@ -1,0 +1,109 @@
+<%- include('./partials/head', { pageTitle: 'Medios' }) %>
+<body>
+<%- include('./partials/sidebar', { path: '/admin/media', user: user }) %>
+
+<div class="main-content">
+  <div class="topbar">
+    <span class="topbar-title">Biblioteca de medios</span>
+    <label class="btn btn-primary btn-sm" for="upload-input" style="cursor:pointer;margin:0;">
+      <i class="bi bi-upload me-1"></i>Subir archivo
+    </label>
+  </div>
+
+  <div class="page-body">
+    <% const errorMsg = flash && flash.error && flash.error.length ? flash.error[0] : null %>
+    <% const successMsg = flash && flash.success && flash.success.length ? flash.success[0] : null %>
+    <% if (errorMsg) { %><div class="alert alert-danger mb-3"><%= errorMsg %></div><% } %>
+    <% if (successMsg) { %><div class="alert alert-success mb-3"><%= successMsg %></div><% } %>
+
+    <!-- Upload form (hidden, triggered by button) -->
+    <form method="POST" action="/admin/media" enctype="multipart/form-data" id="upload-form">
+      <input type="file" id="upload-input" name="file" accept="image/*,.pdf,.doc,.docx"
+        style="display:none;" onchange="document.getElementById('upload-form').submit()">
+    </form>
+
+    <!-- Drop zone -->
+    <div id="drop-zone" style="border:2px dashed #d1d5db;border-radius:10px;padding:32px;text-align:center;color:#9ca3af;margin-bottom:24px;cursor:pointer;transition:all 0.2s;">
+      <i class="bi bi-cloud-upload" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+      <span style="font-size:0.9rem;">Arrastra archivos aquí o <label for="upload-input" style="color:#6366f1;cursor:pointer;font-weight:500;">haz clic para subir</label></span>
+      <div style="font-size:0.78rem;margin-top:4px;">PNG, JPG, GIF, PDF hasta 10MB</div>
+    </div>
+
+    <!-- Media grid -->
+    <% if (media && media.length > 0) { %>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
+        <% media.forEach(item => { %>
+          <div class="media-item" style="border:1px solid #e5e7eb;border-radius:9px;overflow:hidden;background:#fff;position:relative;cursor:pointer;"
+            onclick="selectMedia('<%= item.filename %>', '<%= item.original_name %>')">
+
+            <% const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(item.filename) %>
+            <% if (isImage) { %>
+              <div style="height:120px;background:#f9fafb;overflow:hidden;">
+                <img src="/uploads/<%= item.filename %>" alt="<%= item.original_name %>"
+                  style="width:100%;height:100%;object-fit:cover;">
+              </div>
+            <% } else { %>
+              <div style="height:120px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-file-earmark" style="font-size:2.5rem;color:#9ca3af;"></i>
+              </div>
+            <% } %>
+
+            <div style="padding:8px 10px;">
+              <div style="font-size:0.75rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="<%= item.original_name %>">
+                <%= item.original_name %>
+              </div>
+              <div style="font-size:0.7rem;color:#9ca3af;"><%= item.size ? Math.round(item.size/1024) + ' KB' : '' %></div>
+            </div>
+
+            <!-- Delete btn -->
+            <form method="POST" action="/admin/media/<%= item.id %>?_method=DELETE"
+              onsubmit="event.stopPropagation();return confirm('¿Eliminar este archivo?')"
+              style="position:absolute;top:6px;right:6px;">
+              <button type="submit" class="btn btn-sm" style="background:rgba(0,0,0,0.5);color:white;border:none;border-radius:5px;padding:2px 7px;font-size:0.75rem;">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div style="text-align:center;color:#9ca3af;padding:24px;">
+        No hay archivos subidos todavía.
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Copy URL toast -->
+<div id="copy-toast" style="position:fixed;bottom:24px;right:24px;background:#111827;color:white;padding:10px 18px;border-radius:8px;font-size:0.85rem;display:none;z-index:9999;">
+  <i class="bi bi-clipboard-check me-2"></i>URL copiada al portapapeles
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function selectMedia(filename, name) {
+    const url = '/uploads/' + filename;
+    navigator.clipboard.writeText(url).then(() => {
+      const toast = document.getElementById('copy-toast');
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 2500);
+    });
+  }
+
+  // Drag and drop
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = '#6366f1'; dz.style.background = '#f5f3ff'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor = '#d1d5db'; dz.style.background = ''; });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('upload-input').files = dt.files;
+      document.getElementById('upload-form').submit();
+    }
+  });
+</script>
+</body>
+</html>

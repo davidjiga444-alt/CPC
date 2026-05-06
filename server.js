@@ -3,7 +3,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
 const path = require('path');
-const { initializeDatabase, isInstalled } = require('./config/database');
+const { initializeDatabase, isInstalled, getSetting } = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -60,9 +60,9 @@ app.use('/', require('./routes/public'));
 // ─── 404 & ERROR HANDLING ─────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).render('theme/404', {
-    siteTitle: 'Página no encontrada',
-    siteDescription: '',
-    siteUrl: '',
+    siteTitle: getSetting('site_title') || 'MyCMS',
+    siteDescription: getSetting('site_description') || '',
+    siteUrl: getSetting('site_url') || '',
     navPages: []
   });
 });
