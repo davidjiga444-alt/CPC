@@ -19,6 +19,9 @@ APP_DIR="/var/www/$APP_NAME"
 APP_USER="www-data"
 NODE_VERSION="20"
 PORT=3000
+# URL del repositorio Git remoto (opcional)
+# Si lo configuras, el instalador clonará desde Git y mantendrá un repo para actualizaciones.
+GIT_REPO_URL=""
 
 # ── Funciones de log ─────────────────────────────────────────
 info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
@@ -84,18 +87,57 @@ mkdir -p "$APP_DIR/data"
 
 # Copiar archivos del proyecto (desde el directorio del script)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-info "Copiando archivos desde $SCRIPT_DIR..."
+if [ -n "$GIT_REPO_URL" ]; then
+  info "Clonando repositorio desde $GIT_REPO_URL..."
+  rm -rf "$APP_DIR"/* "$APP_DIR"/.[!.]* "$APP_DIR"/?* 2>/dev/null || true
+  git clone "$GIT_REPO_URL" "$APP_DIR"
+  success "Repositorio clonado en $APP_DIR"
+else
+  info "Copiando archivos desde $SCRIPT_DIR..."
 
-rsync -a \
-  --exclude='node_modules' \
-  --exclude='.git' \
-  --exclude='*.log' \
-  --exclude='data/*.db' \
-  --exclude='data/*.db-*' \
-  --exclude='.env' \
-  "$SCRIPT_DIR/" "$APP_DIR/"
+  rsync -a \
+    --exclude='node_modules' \
+    --exclude='.git' \
+    --exclude='*.log' \
+    --exclude='data/*.db' \
+    --exclude='data/*.db-*' \
+    --exclude='.env' \
+    "$SCRIPT_DIR/" "$APP_DIR/"
 
-success "Archivos copiados a $APP_DIR"
+  success "Archivos copiados a $APP_DIR"
+fi
+
+# ── PASO 4.1: Crear script de despliegue desde Git ─────────────
+cat > "$APP_DIR/deploy.sh" << 'DEPLOYEOF'
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+
+if [ ! -d .git ]; then
+  echo "ERROR: No se detecta un repositorio Git en $(pwd)."
+  echo "Ejecuta el instalador con GIT_REPO_URL para habilitar despliegues desde Git."
+  exit 1
+fi
+
+echo "[deploy] Actualizando código desde origin/main..."
+git fetch --all --prune
+if git show-ref --verify --quiet refs/heads/main; then
+  git checkout main
+else
+  git checkout -B main
+fi
+git reset --hard origin/main
+
+echo "[deploy] Instalando dependencias de Node.js..."
+npm install --omit=dev --quiet
+
+echo "[deploy] Reiniciando servicio mycms..."
+sudo systemctl restart mycms
+
+echo "[deploy] Despliegue completado."
+DEPLOYEOF
+chmod +x "$APP_DIR/deploy.sh"
+success "Script de despliegue creado en $APP_DIR/deploy.sh"
 
 # ── PASO 5: Instalar dependencias Node ───────────────────────
 info "Instalando dependencias de Node.js (npm install)..."
