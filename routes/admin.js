@@ -119,7 +119,7 @@ router.get('/posts/new', requireAuth, (req, res) => {
   const categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
   res.render('admin/posts/edit', {
     user: req.session.user, post: null, categories,
-    selectedCategories: [], siteTitle: getSetting('site_title'),
+    selectedCategories: [], postCategories: [], siteTitle: getSetting('site_title'),
     flash: { error: req.flash('error'), success: req.flash('success') }
   });
 });
@@ -132,6 +132,7 @@ router.get('/posts/:id/edit', requireAuth, (req, res) => {
   const selectedCategories = db.prepare('SELECT category_id FROM post_categories WHERE post_id = ?').all(post.id).map(r => r.category_id);
   res.render('admin/posts/edit', {
     user: req.session.user, post, categories, selectedCategories,
+    postCategories: selectedCategories,
     siteTitle: getSetting('site_title'),
     flash: { error: req.flash('error'), success: req.flash('success') }
   });
@@ -155,7 +156,7 @@ router.post('/posts', requireAuth, upload.single('featured_image'), (req, res) =
   res.redirect('/admin/posts');
 });
 
-router.post('/posts/:id', requireAuth, upload.single('featured_image'), (req, res) => {
+const updatePostHandler = (req, res) => {
   const { title, content, excerpt, status, categories } = req.body;
   const db = getDb();
   const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
@@ -176,7 +177,10 @@ router.post('/posts/:id', requireAuth, upload.single('featured_image'), (req, re
   }
   req.flash('success', 'Entrada actualizada correctamente.');
   res.redirect('/admin/posts');
-});
+};
+
+router.put('/posts/:id', requireAuth, upload.single('featured_image'), updatePostHandler);
+router.post('/posts/:id', requireAuth, upload.single('featured_image'), updatePostHandler);
 
 router.post('/posts/:id/delete', requireAuth, (req, res) => {
   const db = getDb();

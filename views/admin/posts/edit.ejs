@@ -114,7 +114,7 @@
   const titleInput = document.getElementById('title');
   const slugInput = document.getElementById('slug');
   const slugPreview = document.getElementById('slug-preview');
-  const isNew = !<%= post && post.id ? 'false' : 'true' %>;
+  const isNew = !<%= post && post.id ? 'true' : 'false' %>;
 
   function slugify(text) {
     return text.toLowerCase()
