@@ -189,6 +189,13 @@ router.post('/posts/:id/delete', requireAuth, (req, res) => {
   res.redirect('/admin/posts');
 });
 
+router.delete('/posts/:id', requireAuth, (req, res) => {
+  const db = getDb();
+  db.prepare('DELETE FROM posts WHERE id = ?').run(req.params.id);
+  req.flash('success', 'Entrada eliminada.');
+  res.redirect('/admin/posts');
+});
+
 // ─── PAGES ───────────────────────────────────────────────────────────────────
 
 router.get('/pages', requireAuth, (req, res) => {
@@ -249,6 +256,13 @@ router.post('/pages/:id/delete', requireAuth, (req, res) => {
   res.redirect('/admin/pages');
 });
 
+router.delete('/pages/:id', requireAuth, (req, res) => {
+  const db = getDb();
+  db.prepare('DELETE FROM pages WHERE id = ?').run(req.params.id);
+  req.flash('success', 'Página eliminada.');
+  res.redirect('/admin/pages');
+});
+
 // ─── MEDIA ───────────────────────────────────────────────────────────────────
 
 router.get('/media', requireAuth, (req, res) => {
@@ -276,6 +290,18 @@ router.post('/media/upload', requireAuth, upload.array('files', 20), (req, res) 
 });
 
 router.post('/media/:id/delete', requireAuth, (req, res) => {
+  const db = getDb();
+  const media = db.prepare('SELECT * FROM media WHERE id = ?').get(req.params.id);
+  if (media) {
+    const filePath = path.join(__dirname, '..', 'public', 'uploads', media.filename);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    db.prepare('DELETE FROM media WHERE id = ?').run(req.params.id);
+  }
+  req.flash('success', 'Archivo eliminado.');
+  res.redirect('/admin/media');
+});
+
+router.delete('/media/:id', requireAuth, (req, res) => {
   const db = getDb();
   const media = db.prepare('SELECT * FROM media WHERE id = ?').get(req.params.id);
   if (media) {
@@ -319,6 +345,13 @@ router.post('/categories/:id/delete', requireAuth, requireAdmin, (req, res) => {
   res.redirect('/admin/categories');
 });
 
+router.delete('/categories/:id', requireAuth, requireAdmin, (req, res) => {
+  const db = getDb();
+  db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
+  req.flash('success', 'Categoría eliminada.');
+  res.redirect('/admin/categories');
+});
+
 // ─── USERS ───────────────────────────────────────────────────────────────────
 
 router.get('/users', requireAuth, requireAdmin, (req, res) => {
@@ -343,6 +376,17 @@ router.post('/users', requireAuth, requireAdmin, async (req, res) => {
 });
 
 router.post('/users/:id/delete', requireAuth, requireAdmin, (req, res) => {
+  if (parseInt(req.params.id) === req.session.user.id) {
+    req.flash('error', 'No puedes eliminar tu propio usuario.');
+    return res.redirect('/admin/users');
+  }
+  const db = getDb();
+  db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+  req.flash('success', 'Usuario eliminado.');
+  res.redirect('/admin/users');
+});
+
+router.delete('/users/:id', requireAuth, requireAdmin, (req, res) => {
   if (parseInt(req.params.id) === req.session.user.id) {
     req.flash('error', 'No puedes eliminar tu propio usuario.');
     return res.redirect('/admin/users');

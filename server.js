@@ -63,6 +63,10 @@ app.use((req, res) => {
     siteTitle: getSetting('site_title') || 'MyCMS',
     siteDescription: getSetting('site_description') || '',
     siteUrl: getSetting('site_url') || '',
+    theme_color: getSetting('theme_color') || '#6366f1',
+    theme_font: getSetting('theme_font') || 'DM Sans',
+    theme_bg: getSetting('theme_bg') || '#ffffff',
+    theme_text_color: getSetting('theme_text_color') || '#111827',
     navPages: []
   });
 });
