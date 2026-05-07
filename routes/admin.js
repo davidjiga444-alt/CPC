@@ -360,6 +360,10 @@ router.get('/settings', requireAuth, requireAdmin, (req, res) => {
       site_url: getSetting('site_url'),
       posts_per_page: getSetting('posts_per_page'),
       theme: getSetting('theme'),
+      theme_color: getSetting('theme_color') || '#6366f1',
+      theme_font: getSetting('theme_font') || 'DM Sans',
+      theme_bg: getSetting('theme_bg') || '#ffffff',
+      theme_text_color: getSetting('theme_text_color') || '#111827',
       site_logo: getSetting('site_logo'),
       site_favicon: getSetting('site_favicon'),
       footer_text: getSetting('footer_text'),
@@ -371,11 +375,15 @@ router.get('/settings', requireAuth, requireAdmin, (req, res) => {
 });
 
 router.post('/settings', requireAuth, requireAdmin, (req, res) => {
-  const { site_title, site_description, site_url, posts_per_page } = req.body;
+  const { site_title, site_description, site_url, posts_per_page, theme_color, theme_font, theme_bg, theme_text_color } = req.body;
   setSetting('site_title', site_title || 'MyCMS');
   setSetting('site_description', site_description || '');
   setSetting('site_url', site_url || '');
   setSetting('posts_per_page', posts_per_page || '10');
+  setSetting('theme_color', theme_color || '#6366f1');
+  setSetting('theme_font', theme_font || 'DM Sans');
+  setSetting('theme_bg', theme_bg || '#ffffff');
+  setSetting('theme_text_color', theme_text_color || '#111827');
   req.flash('success', 'Ajustes guardados correctamente.');
   res.redirect('/admin/settings');
 });

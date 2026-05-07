@@ -29,7 +29,6 @@
               <div class="mb-3">
                 <label class="form-label">Descripción</label>
                 <textarea name="site_description" class="form-control" rows="2"><%= settings.site_description || '' %></textarea>
-                <div class="form-text">Aparece en el subtítulo y en los meta tags.</div>
               </div>
               <div class="mb-3">
                 <label class="form-label">URL del sitio</label>
@@ -50,32 +49,117 @@
             </div>
           </div>
 
-          <!-- Appearance -->
-          <div class="card">
-            <div class="card-header">Apariencia</div>
+          <!-- Apariencia / Tema -->
+          <div class="card mb-4">
+            <div class="card-header">🎨 Apariencia del tema público</div>
             <div class="card-body">
-              <div class="mb-3">
-                <label class="form-label">Tema activo</label>
-                <select name="theme" class="form-select" style="max-width:220px;">
-                  <option value="default" <%= settings.theme === 'default' ? 'selected' : '' %>>Default (incluido)</option>
-                </select>
-                <div class="form-text">Más temas disponibles próximamente.</div>
+
+              <!-- Preview -->
+              <div id="theme-preview" style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+                <div id="preview-header" style="padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e5e7eb;">
+                  <div id="preview-logo" style="width:28px;height:28px;border-radius:6px;background:#6366f1;"></div>
+                  <span id="preview-sitename" style="font-weight:700;font-size:0.95rem;"><%= settings.site_title || 'Mi sitio' %></span>
+                  <div style="flex:1;"></div>
+                  <div style="display:flex;gap:8px;">
+                    <span id="preview-nav1" style="font-size:0.75rem;color:#6b7280;">Inicio</span>
+                    <span id="preview-nav2" style="font-size:0.75rem;color:#6b7280;">Acerca de</span>
+                  </div>
+                </div>
+                <div id="preview-body" style="padding:20px 18px;background:#fff;">
+                  <div id="preview-badge" style="display:inline-block;font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#ede9fe;color:#6d28d9;margin-bottom:8px;">CATEGORÍA</div>
+                  <div id="preview-title" style="font-size:1.2rem;font-weight:700;margin-bottom:6px;line-height:1.3;">Título de ejemplo del artículo</div>
+                  <div id="preview-text" style="font-size:0.82rem;color:#6b7280;line-height:1.6;">Este es un ejemplo de cómo se verá el texto en tu sitio web con la configuración seleccionada.</div>
+                  <div id="preview-btn" style="display:inline-block;margin-top:12px;padding:7px 16px;border-radius:7px;background:#6366f1;color:white;font-size:0.8rem;font-weight:600;">Leer más →</div>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Logo (URL o ruta)</label>
-                <input type="text" name="site_logo" class="form-control" value="<%= settings.site_logo || '' %>" placeholder="/uploads/logo.png">
-                <% if (settings.site_logo) { %>
-                  <img src="<%= settings.site_logo %>" alt="Logo" style="height:40px;margin-top:8px;border-radius:4px;">
-                <% } %>
+
+              <div class="row g-3">
+                <!-- Color principal -->
+                <div class="col-sm-6">
+                  <label class="form-label fw-500">Color principal</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input type="color" name="theme_color" id="theme_color"
+                      value="<%= settings.theme_color || '#6366f1' %>"
+                      style="width:48px;height:38px;border-radius:7px;border:1px solid #e5e7eb;padding:2px;cursor:pointer;">
+                    <input type="text" id="theme_color_hex" class="form-control form-control-sm"
+                      value="<%= settings.theme_color || '#6366f1' %>"
+                      style="max-width:100px;font-family:monospace;">
+                  </div>
+                  <div class="form-text">Color de botones, enlaces y acentos</div>
+                </div>
+
+                <!-- Color de fondo -->
+                <div class="col-sm-6">
+                  <label class="form-label fw-500">Color de fondo</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input type="color" name="theme_bg" id="theme_bg"
+                      value="<%= settings.theme_bg || '#ffffff' %>"
+                      style="width:48px;height:38px;border-radius:7px;border:1px solid #e5e7eb;padding:2px;cursor:pointer;">
+                    <input type="text" id="theme_bg_hex" class="form-control form-control-sm"
+                      value="<%= settings.theme_bg || '#ffffff' %>"
+                      style="max-width:100px;font-family:monospace;">
+                  </div>
+                  <div class="form-text">Color de fondo de la web pública</div>
+                </div>
+
+                <!-- Color de texto -->
+                <div class="col-sm-6">
+                  <label class="form-label fw-500">Color del texto</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input type="color" name="theme_text_color" id="theme_text_color"
+                      value="<%= settings.theme_text_color || '#111827' %>"
+                      style="width:48px;height:38px;border-radius:7px;border:1px solid #e5e7eb;padding:2px;cursor:pointer;">
+                    <input type="text" id="theme_text_hex" class="form-control form-control-sm"
+                      value="<%= settings.theme_text_color || '#111827' %>"
+                      style="max-width:100px;font-family:monospace;">
+                  </div>
+                  <div class="form-text">Color principal del texto</div>
+                </div>
+
+                <!-- Fuente -->
+                <div class="col-sm-6">
+                  <label class="form-label fw-500">Tipografía</label>
+                  <select name="theme_font" id="theme_font" class="form-select">
+                    <option value="DM Sans" <%= (settings.theme_font || 'DM Sans') === 'DM Sans' ? 'selected' : '' %>>DM Sans — Moderna</option>
+                    <option value="Inter" <%= settings.theme_font === 'Inter' ? 'selected' : '' %>>Inter — Técnica</option>
+                    <option value="Lato" <%= settings.theme_font === 'Lato' ? 'selected' : '' %>>Lato — Limpia</option>
+                    <option value="Merriweather" <%= settings.theme_font === 'Merriweather' ? 'selected' : '' %>>Merriweather — Clásica</option>
+                    <option value="Playfair Display" <%= settings.theme_font === 'Playfair Display' ? 'selected' : '' %>>Playfair Display — Elegante</option>
+                    <option value="Roboto" <%= settings.theme_font === 'Roboto' ? 'selected' : '' %>>Roboto — Neutra</option>
+                    <option value="Nunito" <%= settings.theme_font === 'Nunito' ? 'selected' : '' %>>Nunito — Amigable</option>
+                    <option value="Oswald" <%= settings.theme_font === 'Oswald' ? 'selected' : '' %>>Oswald — Impactante</option>
+                    <option value="Source Serif 4" <%= settings.theme_font === 'Source Serif 4' ? 'selected' : '' %>>Source Serif — Editorial</option>
+                  </select>
+                  <div class="form-text">Fuente usada en toda la web pública</div>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Favicon (URL o ruta)</label>
-                <input type="text" name="site_favicon" class="form-control" value="<%= settings.site_favicon || '' %>" placeholder="/uploads/favicon.ico">
+
+              <!-- Color presets -->
+              <div class="mt-4">
+                <label class="form-label fw-500">Paletas predefinidas</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button type="button" class="preset-btn" data-color="#6366f1" data-bg="#ffffff" data-text="#111827" style="background:#6366f1;" title="Índigo"></button>
+                  <button type="button" class="preset-btn" data-color="#0ea5e9" data-bg="#f0f9ff" data-text="#0c4a6e" style="background:#0ea5e9;" title="Azul cielo"></button>
+                  <button type="button" class="preset-btn" data-color="#10b981" data-bg="#f0fdf4" data-text="#064e3b" style="background:#10b981;" title="Esmeralda"></button>
+                  <button type="button" class="preset-btn" data-color="#f59e0b" data-bg="#fffbeb" data-text="#78350f" style="background:#f59e0b;" title="Ámbar"></button>
+                  <button type="button" class="preset-btn" data-color="#ef4444" data-bg="#fff5f5" data-text="#7f1d1d" style="background:#ef4444;" title="Rojo"></button>
+                  <button type="button" class="preset-btn" data-color="#8b5cf6" data-bg="#faf5ff" data-text="#4c1d95" style="background:#8b5cf6;" title="Violeta"></button>
+                  <button type="button" class="preset-btn" data-color="#ec4899" data-bg="#fdf2f8" data-text="#831843" style="background:#ec4899;" title="Rosa"></button>
+                  <button type="button" class="preset-btn" data-color="#14b8a6" data-bg="#f0fdfa" data-text="#134e4a" style="background:#14b8a6;" title="Teal"></button>
+                  <button type="button" class="preset-btn" data-color="#1e293b" data-bg="#f8fafc" data-text="#0f172a" style="background:#1e293b;" title="Oscuro"></button>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Footer / Pie de página</label>
-                <input type="text" name="footer_text" class="form-control" value="<%= settings.footer_text || '' %>" placeholder="© 2025 Mi Sitio">
-              </div>
+
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="card">
+            <div class="card-header">Pie de página</div>
+            <div class="card-body">
+              <input type="text" name="footer_text" class="form-control"
+                value="<%= settings.footer_text || '' %>"
+                placeholder="© 2025 Mi Sitio">
             </div>
           </div>
 
@@ -86,7 +170,7 @@
             <div class="card-header">Información del sistema</div>
             <div class="card-body">
               <table class="table table-sm mb-0" style="font-size:0.82rem;">
-                <tr><td style="color:#6b7280;">Versión MyCMS</td><td><strong>1.0.0</strong></td></tr>
+                <tr><td style="color:#6b7280;">Versión</td><td><strong>1.0.0</strong></td></tr>
                 <tr><td style="color:#6b7280;">Node.js</td><td><strong><%= process ? process.version : 'N/A' %></strong></td></tr>
                 <tr><td style="color:#6b7280;">Instalado</td><td><strong><%= settings.installed_at ? new Date(settings.installed_at).toLocaleDateString('es-ES') : 'N/A' %></strong></td></tr>
                 <tr><td style="color:#6b7280;">Base de datos</td><td><strong>SQLite</strong></td></tr>
@@ -94,12 +178,67 @@
             </div>
           </div>
         </div>
-
       </div>
     </form>
   </div>
 </div>
 
+<style>
+  .preset-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 3px solid transparent; cursor: pointer;
+    transition: all 0.15s; outline: none;
+  }
+  .preset-btn:hover { transform: scale(1.15); border-color: rgba(0,0,0,0.2); }
+  .preset-btn.active { border-color: #111827; transform: scale(1.1); }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Sync color picker with hex input
+  function syncColor(pickerId, hexId, previewFn) {
+    const picker = document.getElementById(pickerId);
+    const hex = document.getElementById(hexId);
+    picker.addEventListener('input', () => { hex.value = picker.value; previewFn(); });
+    hex.addEventListener('input', () => {
+      if (/^#[0-9a-fA-F]{6}$/.test(hex.value)) { picker.value = hex.value; previewFn(); }
+    });
+  }
+
+  function updatePreview() {
+    const color = document.getElementById('theme_color').value;
+    const bg = document.getElementById('theme_bg').value;
+    const text = document.getElementById('theme_text_color').value;
+    const font = document.getElementById('theme_font').value;
+
+    document.getElementById('preview-body').style.background = bg;
+    document.getElementById('preview-body').style.fontFamily = font + ', sans-serif';
+    document.getElementById('preview-title').style.color = text;
+    document.getElementById('preview-text').style.color = text;
+    document.getElementById('preview-btn').style.background = color;
+    document.getElementById('preview-logo').style.background = color;
+    document.getElementById('preview-sitename').style.color = text;
+  }
+
+  syncColor('theme_color', 'theme_color_hex', updatePreview);
+  syncColor('theme_bg', 'theme_bg_hex', updatePreview);
+  syncColor('theme_text_color', 'theme_text_hex', updatePreview);
+  document.getElementById('theme_font').addEventListener('change', updatePreview);
+
+  // Preset buttons
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('theme_color').value = btn.dataset.color;
+      document.getElementById('theme_color_hex').value = btn.dataset.color;
+      document.getElementById('theme_bg').value = btn.dataset.bg;
+      document.getElementById('theme_bg_hex').value = btn.dataset.bg;
+      document.getElementById('theme_text_color').value = btn.dataset.text;
+      document.getElementById('theme_text_hex').value = btn.dataset.text;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updatePreview();
+    });
+  });
+</script>
 </body>
 </html>
