@@ -23,6 +23,9 @@ router.post('/', async (req, res) => {
   if (admin_password.length < 8) {
     return res.render('setup/index', { error: 'La contraseña debe tener al menos 8 caracteres.', step: 1, body: req.body });
   }
+  if (!/[a-zA-Z]/.test(admin_password) || !/[0-9]/.test(admin_password)) {
+    return res.render('setup/index', { error: 'La contraseña debe contener letras y números.', step: 1, body: req.body });
+  }
 
   try {
     initializeDatabase();
@@ -72,7 +75,10 @@ router.post('/', async (req, res) => {
     res.redirect('/admin/login');
   } catch (err) {
     console.error(err);
-    res.render('setup/index', { error: 'Error durante la instalación: ' + err.message, step: 1, body: req.body });
+    const errMsg = process.env.NODE_ENV === 'production'
+      ? 'Error durante la instalación. Revisa los logs del servidor.'
+      : 'Error durante la instalación: ' + err.message;
+    res.render('setup/index', { error: errMsg, step: 1, body: req.body });
   }
 });
 

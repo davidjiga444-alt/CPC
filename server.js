@@ -3,27 +3,57 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
 const path = require('path');
+const crypto = require('crypto');
+const helmet = require('helmet');
 const { initializeDatabase, isInstalled, getSetting } = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ─── SECURITY HEADERS ────────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+    }
+  }
+}));
 
 // ─── VIEW ENGINE ─────────────────────────────────────────────────────────────
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+if (!process.env.SESSION_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('FATAL: SESSION_SECRET env var no está configurado. Deteniéndose.');
+    process.exit(1);
+  }
+  console.warn('⚠️  SESSION_SECRET no configurado. Usa una clave segura en producción (variable de entorno SESSION_SECRET).');
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'mycms-secret-change-in-production-' + Math.random(),
+  secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));

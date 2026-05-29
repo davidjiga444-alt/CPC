@@ -5,9 +5,25 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const slugify = require('slugify');
+const rateLimit = require('express-rate-limit');
 const { getDb, getSetting, setSetting } = require('../config/database');
 const { requireAuth, requireAdmin, redirectIfAuth } = require('../middleware/authentication/auth');
 const { loginUser, changePassword, createUser } = require('../services/authService');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    req.flash('error', 'Demasiados intentos de inicio de sesión. Espera 15 minutos.');
+    res.redirect('/admin/login');
+  }
+});
+
+function isValidHexColor(c) {
+  return /^#[0-9a-fA-F]{6}$/.test(c);
+}
 
 // Multer config for media uploads
 const storage = multer.diskStorage({
@@ -25,10 +41,14 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif|webp|svg|pdf|mp4|mp3|doc|docx|zip/;
-    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-    const mime = allowed.test(file.mimetype);
-    cb(null, ext || mime);
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedMimes.includes(file.mimetype) && allowedExts.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten imágenes (JPG, PNG, GIF, WebP).'));
+    }
   }
 });
 
@@ -50,7 +70,7 @@ router.get('/login', redirectIfAuth, (req, res) => {
   });
 });
 
-router.post('/login', redirectIfAuth, async (req, res) => {
+router.post('/login', redirectIfAuth, loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   const user = await loginUser(username, password);
   if (!user) {
@@ -366,6 +386,8 @@ router.get('/users', requireAuth, requireAdmin, (req, res) => {
 router.post('/users', requireAuth, requireAdmin, async (req, res) => {
   const { username, email, password, role } = req.body;
   if (!username || !email || !password) { req.flash('error', 'Todos los campos son obligatorios.'); return res.redirect('/admin/users'); }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { req.flash('error', 'El formato del email no es válido.'); return res.redirect('/admin/users'); }
+  if (password.length < 8) { req.flash('error', 'La contraseña debe tener al menos 8 caracteres.'); return res.redirect('/admin/users'); }
   const result = await createUser(username, email, password, role || 'editor');
   if (!result.ok) {
     req.flash('error', result.error);
@@ -428,10 +450,10 @@ router.post('/settings', requireAuth, requireAdmin, (req, res) => {
   setSetting('site_description', site_description || '');
   setSetting('site_url', site_url || '');
   setSetting('posts_per_page', posts_per_page || '10');
-  setSetting('theme_color', theme_color || '#6366f1');
+  setSetting('theme_color', isValidHexColor(theme_color) ? theme_color : '#6366f1');
   setSetting('theme_font', theme_font || 'DM Sans');
-  setSetting('theme_bg', theme_bg || '#ffffff');
-  setSetting('theme_text_color', theme_text_color || '#111827');
+  setSetting('theme_bg', isValidHexColor(theme_bg) ? theme_bg : '#ffffff');
+  setSetting('theme_text_color', isValidHexColor(theme_text_color) ? theme_text_color : '#111827');
   req.flash('success', 'Ajustes guardados correctamente.');
   res.redirect('/admin/settings');
 });
@@ -476,6 +498,15 @@ router.get('/api/media', requireAuth, (req, res) => {
   const db = getDb();
   const media = db.prepare("SELECT * FROM media WHERE mimetype LIKE 'image/%' ORDER BY created_at DESC LIMIT 50").all();
   res.json(media.map(m => ({ id: m.id, url: '/uploads/' + m.filename, name: m.original_name })));
+});
+
+// Handle multer file type errors gracefully
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError || err.message?.includes('Solo se permiten')) {
+    req.flash('error', err.message);
+    return res.redirect('back');
+  }
+  next(err);
 });
 
 module.exports = router;
